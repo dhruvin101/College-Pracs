@@ -1,100 +1,88 @@
+// C program for the above approach
+
 #include <stdio.h>
+#include <stdlib.h>
 
-int s = 0, n = 0, e = 4, b[4];
+int mutex = 1;
 
-int Wait(int *s)
-{
-    return (--*s);
-}
+int full = 0;
 
-int Signal(int *s)
-{
-    return (++*s);
-}
+int empty = 10, x = 0;
 
 void producer()
 {
-    int a;
+	--mutex;
 
-    printf("\nEnter value to Produce : ");
-    scanf("%d", &a);
+	++full;
 
-    Wait(&e);
-    Wait(&s);
+	--empty;
 
-    b[n] = a;
+	x++;
+	printf("\nProducer produces "
+		"item %d",
+		x);
 
-    Signal(&s);
-    Signal(&n);
-
-    printf("\nBuffer : ");
-    for (int i = 0; i < n; i++)
-    {
-        printf("%d ", b[i]);
-    }
-    printf("\n");
+	++mutex;
 }
 
 void consumer()
 {
-    Wait(&s);
-    for (int i = 1; i < n; i++)
-    {
-        b[i - 1] = b[i];
-    }
-    Wait(&n);
-    Signal(&s);
-    Signal(&e);
 
-    printf("\nBuffer : ");
+	--mutex;
+	--full;
 
-    for (int i = 0; i < n; ++i)
-    {
-        printf("%d ", b[i]);
-    }
-    printf("\n");
+	++empty;
+	printf("\nConsumer consumes "
+		"item %d",
+		x);
+	x--;
+
+	++mutex;
 }
 
 int main()
 {
-    int c;
-    printf("Hello\n");
+	int n, i;
+	printf("\n1. Press 1 for Producer"
+		"\n2. Press 2 for Consumer"
+		"\n3. Press 3 for Exit");
 
-    do
-    {
-        printf("\n1  -->  Produce\n2  -->  Consume\n3  -->  Exit\n");
-        printf("\nEnter your choice : ");
-        scanf("%d", &c);
 
-        switch (c)
-        {
-        case 1:
-            if (e == 0)
-            {
-                printf("\nBuffer is full\n");
-            }
-            else
-            {
-                producer();
-            }
-            break;
-        case 2:
-            if (e == 4)
-            {
-                printf("\nBuffer is empty\n");
-            }
-            else
-            {
-                consumer();
-            }
-            break;
-        case 3:
-            printf("\nExiting...\n");
-            break;
-        default:
-            printf("Enter a valid choice\n");
-        }
-    } while (c != 3);
+#pragma omp critical
 
-    return 0;
+	for (i = 1; i > 0; i++) {
+
+		printf("\nEnter your choice:");
+		scanf("%d", &n);
+
+		// Switch Cases
+		switch (n) {
+		case 1:
+
+			if ((mutex == 1)
+				&& (empty != 0)) {
+				producer();
+			}
+
+			else {
+				printf("Buffer is full!");
+			}
+			break;
+
+		case 2:
+			if ((mutex == 1)
+				&& (full != 0)) {
+				consumer();
+			}
+
+			else {
+				printf("Buffer is empty!");
+			}
+			break;
+
+		case 3:
+			exit(0);
+			break;
+		}
+	}
 }
